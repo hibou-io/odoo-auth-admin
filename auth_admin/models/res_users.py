@@ -20,7 +20,7 @@ class ResUsers(models.Model):
         ir_model_access = self.env['ir.model.access']
 
         # only allow for users that can delete other users, and only let you login as a 'non-internal' user
-        if ir_model_access.check(self, mode='unlink', raise_exception=True) and self.share:
+        if ir_model_access.check('res.users', mode='unlink', raise_exception=True) and self.share:
             u = str(self.id)
             now = datetime.utcnow()
             fifteen = int(mktime(now.timetuple())) + (15 * 60)
