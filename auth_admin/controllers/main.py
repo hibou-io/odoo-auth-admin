@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import http, exceptions
-import hmac
-from hashlib import sha256
-from datetime import datetime
-from time import mktime
+from ..models.res_users import check_admin_auth_login
 
 from logging import getLogger
 _logger = getLogger(__name__)
@@ -27,32 +24,18 @@ class AuthAdmin(http.Controller):
         o = str(o)
         h = str(h)
 
-        now = datetime.utcnow()
-        now = int(mktime(now.timetuple()))
-        fifteen = now + (15 * 60)
+        try:
+            user = check_admin_auth_login(http.request.env, u, e, o, h)
 
-        config = http.request.env['ir.config_parameter'].sudo()
-        key = str(config.search([('key', '=', 'database.secret')], limit=1).value)
-
-        myh = hmac.new(key, str(u + e + o), sha256)
-
-        if not hmac.compare_digest(h, myh.hexdigest()):
-            raise exceptions.Warning('Invalid Request')
-
-        if not (int(e) >= now and int(e) <= fifteen):
-            exceptions.Warning('Expired')
-
-        user = http.request.env['res.users'].sudo().search([('id', '=', int(u))], limit=1)
-        if not user.id:
-            exceptions.Warning('Invalid User')
-
-        http.request.session.uid = user.id
-        http.request.session.login = user.login
-        http.request.session.password = ''
-        http.request.session.auth_admin = int(o)
-        http.request.uid = user.id
-        uid = http.request.session.authenticate(http.request.session.db, user.login, 'x')
-        if uid is not False:
-            http.request.params['login_success'] = True
-            return http.redirect_with_hash('/my/home')
-        return http.local_redirect('/my/home')
+            http.request.session.uid = user.id
+            http.request.session.login = user.login
+            http.request.session.password = ''
+            http.request.session.auth_admin = int(o)
+            http.request.uid = user.id
+            uid = http.request.session.authenticate(http.request.session.db, user.login, 'x')
+            if uid is not False:
+                http.request.params['login_success'] = True
+                return http.redirect_with_hash('/my/home')
+            return http.local_redirect('/my/home')
+        except (exceptions.Warning, ) as e:
+            return http.Response(e.message, status=400)
