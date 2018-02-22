@@ -84,7 +84,7 @@ class ResUsers(models.Model):
 
     @api.model
     def check_credentials(self, password):
-        if request.session.get('auth_admin'):
+        if hasattr(request, 'session') and request.session.get('auth_admin'):
             _logger.warn('check_credentials for user id: ' + str(request.session.uid) + ' original user id: ' + str(request.session.auth_admin))
             return True
         return super(ResUsers, self).check_credentials(password)
