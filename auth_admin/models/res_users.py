@@ -28,7 +28,7 @@ def admin_auth_generate_login(env, user):
 
     config = env['ir.config_parameter'].sudo()
     key = str(config.search([('key', '=', 'database.secret')], limit=1).value)
-    h = hmac.new(key, u + e + o, sha256)
+    h = hmac.new(key.encode(), (u + e + o).encode(), sha256)
 
     base_url = str(config.search([('key', '=', 'web.base.url')], limit=1).value)
 
@@ -55,7 +55,7 @@ def check_admin_auth_login(env, u_user_id, e_expires, o_org_user_id, hash_):
     config = env['ir.config_parameter'].sudo()
     key = str(config.search([('key', '=', 'database.secret')], limit=1).value)
 
-    myh = hmac.new(key, str(str(u_user_id) + str(e_expires) + str(o_org_user_id)), sha256)
+    myh = hmac.new(key.encode(), str(str(u_user_id) + str(e_expires) + str(o_org_user_id)).encode(), sha256)
 
     if not hmac.compare_digest(hash_, myh.hexdigest()):
         raise exceptions.Warning('Invalid Request')

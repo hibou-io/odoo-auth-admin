@@ -4,7 +4,7 @@
     'name': 'Auth Admin',
     'author': 'Hibou Corp. <hello@hibou.io>',
     'category': 'Hidden',
-    'version': '1.0',
+    'version': '11.0.0.0.0',
     'description':
         """
 Login as other user
