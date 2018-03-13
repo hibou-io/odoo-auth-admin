@@ -1,4 +1,3 @@
-from logging import getLogger
 from odoo import api, fields, models
 from ..models.res_users import admin_auth_generate_login
 
@@ -20,7 +19,6 @@ class PortalWizardUser(models.TransientModel):
 
     @api.multi
     def admin_auth_generate_login(self):
-        config = self.env['ir.config_parameter'].sudo()
         ir_model_access = self.env['ir.model.access']
         for row in self:
             row.force_login_url = ''
